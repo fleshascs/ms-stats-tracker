@@ -2,10 +2,15 @@ import fs from 'fs';
 import readline from 'readline';
 import fetch from 'node-fetch';
 import { format, subDays } from 'date-fns';
+import path from 'path';
 
 (async () => {
   const yesterday = subDays(new Date(), 1);
-  const filePath = './logs/' + 'ms_' + format(yesterday, 'yyyy.MM.dd') + '.log';
+  const logFileName = 'ms_' + format(yesterday, 'yyyy.MM.dd') + '.log';
+
+  // cant just use path ./logs because of cron running app from /root dir
+  // __dirname in docker resolves path: /snapshot/app/logs/ms_2022.02.27.log which doesn't work
+  const filePath = path.resolve(process.env.WORKDIR || '.', './logs/' + logFileName);
   const fileStream = fs.createReadStream(filePath);
 
   const rl = readline.createInterface({ input: fileStream });
